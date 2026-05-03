@@ -1,0 +1,122 @@
+# 🧋 Tea Shop Manager - QUICK START
+
+## ⚡ GET RUNNING IN 5 MINUTES
+
+### Step 1: Install Python (if not already)
+Download from [python.org](https://www.python.org) - choose 3.8 or higher
+
+### Step 2: Open Terminal/PowerShell
+Navigate to the project folder:
+```bash
+cd "c:\Users\admin\Desktop\Tea To Mark\milk_tea_shop"
+```
+
+### Step 3: Install & Setup (First Time Only)
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python init_data.py
+```
+
+### Step 4: Start Server
+```bash
+python manage.py runserver
+```
+
+### Step 5: Open Browser
+Visit: **http://localhost:8000**
+
+---
+
+## ✅ What You Should See
+
+1. **Header:** "🧋 Tea Shop Manager"
+2. **Navigation:** 📊 Dashboard | 💰 Sales | 📦 Inventory | 📋 History
+3. **Dashboard:** Shows today's sales stats and quick action buttons
+
+---
+
+## 📞 DAILY USE
+
+### To Start Each Day
+```bash
+cd "c:\Users\admin\Desktop\Tea To Mark\milk_tea_shop"
+python manage.py runserver
+```
+
+### To Stop
+Press `Ctrl+C` in terminal
+
+---
+
+## 💰 HOW TO USE - SELLING
+
+### Adding a Sale (On Your Phone/Computer)
+1. Click **💰 Sales** button
+2. Choose product from dropdown
+3. Select size (if applicable)
+4. Price auto-shows
+5. Use +/- buttons to set quantity
+6. Click **✓ Save Sale**
+7. Done! Stock auto-deducted, sale recorded
+
+### Viewing Daily Stats
+1. Click **📊 Dashboard**
+2. See today's total and count
+3. See weekly/monthly totals
+4. See any low stock warnings
+
+### Restocking
+1. Click **📦 Inventory**
+2. Find product
+3. Enter quantity to add
+4. Click **Restock** button
+5. Done!
+
+### Checking History
+1. Click **📋 History**
+2. See last 100 sales
+3. Time, product, price for each
+
+---
+
+## 🎯 IMPORTANT NOTES
+
+✅ **All data saved automatically**  
+✅ **Stock updates in real-time**  
+✅ **Works offline** after first load  
+✅ **Mobile-friendly** - use on phone  
+✅ **No login required** for selling  
+
+---
+
+## 🆘 QUICK FIXES
+
+**"No products showing?"**
+```bash
+python init_data.py
+```
+
+**"Port 8000 already in use?"**
+```bash
+python manage.py runserver 8001
+# Then go to http://localhost:8001
+```
+
+**"Can't find database?"**
+Check that `db.sqlite3` exists in the `milk_tea_shop` folder
+
+---
+
+## 📚 NEED MORE HELP?
+
+- **Setup Issues:** Read `SETUP_GUIDE.md`
+- **How It Works:** Read `SYSTEM_DESIGN.md`
+- **Full Documentation:** Read `COMPLETE_DOCUMENTATION.md`
+- **All Details:** Read `README.md`
+
+---
+
+**You're all set! Start selling! 🧋**
+
+For questions, refer to the documentation files in the same folder.

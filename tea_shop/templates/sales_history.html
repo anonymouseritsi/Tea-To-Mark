@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Sales History - Tea Shop Manager{% endblock %}
+
+{% block content %}
+<div class="sales-history">
+    <h2>Sales History</h2>
+    
+    <div class="history-stats">
+        <div class="stat-badge">Total Records: {{ sales|length }}</div>
+    </div>
+
+    <div class="sales-list">
+        {% for sale in sales %}
+        <div class="sale-record">
+            <div class="sale-header">
+                <span class="sale-product">{{ sale.product.name }}</span>
+                {% if sale.size %}
+                <span class="sale-size">({{ sale.size }})</span>
+                {% endif %}
+            </div>
+            <div class="sale-details">
+                <span>Qty: {{ sale.quantity }}</span>
+                <span>Price: ₱{{ sale.price }}</span>
+            </div>
+            <div class="sale-footer">
+                <span class="sale-total">₱{{ sale.total }}</span>
+                <span class="sale-time">{{ sale.timestamp|date:"M d, H:i" }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No sales records yet</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

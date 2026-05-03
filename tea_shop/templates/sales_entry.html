@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}Add Sale - Tea Shop Manager{% endblock %}
+
+{% block content %}
+<div class="sales-entry">
+    <h2>Add Sale</h2>
+    
+    <!-- Category Slicer (Filter) -->
+    <div class="category-filter">
+        <h3>Select Category:</h3>
+        <div class="category-buttons">
+            <button type="button" class="category-btn active" data-category="all">All Products</button>
+            {% for category, products in grouped_products.items %}
+                <button type="button" class="category-btn" data-category="{{ forloop.counter0 }}">
+                    {{ category|truncatewords:2 }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Products Display with Sizes & Prices -->
+    <div class="products-grid" id="productsGrid">
+        {% for category, products in grouped_products.items %}
+            <div class="category-group" data-category-index="{{ forloop.counter0 }}">
+                <h4>{{ category }}</h4>
+                <div class="products-list">
+                    {% for product in products %}
+                    <div class="product-card" data-product-id="{{ product.id }}">
+                        <div class="product-header">
+                            <span class="product-name">{{ product.name }}</span>
+                            <span class="product-stock">Stock: {{ product.stock }}</span>
+                        </div>
+                        <div class="product-prices">
+                            {% if product.price_12oz %}
+                                <button type="button" class="price-btn" onclick="selectProduct({{ product.id }}, '12oz', {{ product.price_12oz }})">
+                                    12oz: ₱{{ product.price_12oz }}
+                                </button>
+                            {% endif %}
+                            {% if product.price_16oz %}
+                                <button type="button" class="price-btn" onclick="selectProduct({{ product.id }}, '16oz', {{ product.price_16oz }})">
+                                    16oz: ₱{{ product.price_16oz }}
+                                </button>
+                            {% endif %}
+                            {% if product.price_22oz %}
+                                <button type="button" class="price-btn" onclick="selectProduct({{ product.id }}, '22oz', {{ product.price_22oz }})">
+                                    22oz: ₱{{ product.price_22oz }}
+                                </button>
+                            {% endif %}
+                            {% if product.price_single %}
+                                <button type="button" class="price-btn" onclick="selectProduct({{ product.id }}, 'single', {{ product.price_single }})">
+                                    Price: ₱{{ product.price_single }}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sale Form (After Product Selection) -->
+    <form id="saleForm" class="sale-form">
+        {% csrf_token %}
+        
+        <!-- Hidden Product Selection -->
+        <input type="hidden" id="productSelect" required>
+        <input type="hidden" id="sizeSelect" required>
+
+        <!-- Selected Product Display -->
+        <div class="selected-product" id="selectedProduct" style="display: none;">
+            <div class="selected-info">
+                <h3 id="selectedProductName"></h3>
+                <p id="selectedProductSize"></p>
+            </div>
+        </div>
+
+        <!-- Auto Price Display -->
+        <div class="price-display">
+            <div class="price-label">Price:</div>
+            <div class="price-value">₱<span id="priceDisplay">0</span></div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <div class="quantity-control">
+                <button type="button" class="btn-qty" onclick="decreaseQty()">−</button>
+                <input type="number" id="quantity" value="1" min="1" max="999">
+                <button type="button" class="btn-qty" onclick="increaseQty()">+</button>
+            </div>
+        </div>
+
+        <!-- Total -->
+        <div class="total-display">
+            <div class="total-label">Total:</div>
+            <div class="total-value">₱<span id="totalDisplay">0</span></div>
+        </div>
+
+        <!-- Stock Info -->
+        <div class="stock-info" id="stockInfo"></div>
+
+        <!-- Buttons -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success btn-large">✓ Save Sale</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="alert alert-success" style="display: none;"></div>
+    </form>
+
+    <!-- Recent Sales -->
+    <div class="recent-sales">
+        <h3>Recent Sales</h3>
+        <div id="recentSalesList" class="sales-list">
+            <p class="text-muted">No sales yet</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPrice = 0;
+let currentProductId = 0;
+let currentSize = '';
+let recentSales = [];
+
+// Category Filter
+document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', filterByCategory);
+});
+
+function filterByCategory(e) {
+    const selectedCategory = e.target.dataset.category;
+    
+    // Update active button
+    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    // Filter products
+    document.querySelectorAll('.category-group').forEach(group => {
+        if (selectedCategory === 'all') {
+            group.style.display = 'block';
+        } else {
+            group.style.display = group.dataset.categoryIndex === selectedCategory ? 'block' : 'none';
+        }
+    });
+}
+
+// Product Selection
+function selectProduct(productId, size, price, productName) {
+    currentProductId = productId;
+    currentSize = size;
+    currentPrice = parseFloat(price);
+    
+    document.getElementById('productSelect').value = productId;
+    document.getElementById('sizeSelect').value = size;
+    
+    // Get product name from the button's parent card
+    const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+    const name = productCard ? productCard.querySelector('.product-name').textContent : '';
+    
+    // Show selected product info
+    document.getElementById('selectedProductName').textContent = name;
+    document.getElementById('selectedProductSize').textContent = `Size: ${size}`;
+    document.getElementById('selectedProduct').style.display = 'block';
+    
+    // Update price display
+    document.getElementById('priceDisplay').textContent = price.toFixed(2);
+    
+    updateTotal();
+}
+
+function updateTotal() {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const total = currentPrice * quantity;
+    document.getElementById('totalDisplay').textContent = total.toFixed(2);
+}
+
+function increaseQty() {
+    const qty = document.getElementById('quantity');
+    qty.value = parseInt(qty.value) + 1;
+    updateTotal();
+}
+
+function decreaseQty() {
+    const qty = document.getElementById('quantity');
+    if (qty.value > 1) {
+        qty.value = parseInt(qty.value) - 1;
+        updateTotal();
+    }
+}
+
+function resetForm() {
+    document.getElementById('saleForm').reset();
+    currentPrice = 0;
+    currentProductId = 0;
+    currentSize = '';
+    document.getElementById('selectedProduct').style.display = 'none';
+    document.getElementById('priceDisplay').textContent = '0';
+    document.getElementById('quantity').value = '1';
+    document.getElementById('successMessage').style.display = 'none';
+}
+
+document.getElementById('saleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentProductId) {
+        alert('Please select a product');
+        return;
+    }
+
+    const quantity = parseInt(document.getElementById('quantity').value);
+
+    const data = {
+        product_id: currentProductId,
+        size: currentSize || null,
+        quantity: quantity,
+        price: currentPrice
+    };
+
+    fetch('/api/add-sale/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(response => {
+        if (response.success) {
+            const productName = document.getElementById('selectedProductName').textContent;
+            recentSales.unshift({
+                product: productName,
+                quantity: quantity,
+                size: currentSize,
+                total: parseFloat(document.getElementById('totalDisplay').textContent)
+            });
+
+            document.getElementById('successMessage').textContent = response.message;
+            document.getElementById('successMessage').style.display = 'block';
+            
+            updateRecentSales();
+            resetForm();
+            
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        } else {
+            alert('Error: ' + response.error);
+        }
+    });
+});
+
+function updateRecentSales() {
+    const list = document.getElementById('recentSalesList');
+    if (recentSales.length === 0) {
+        list.innerHTML = '<p class="text-muted">No sales yet</p>';
+        return;
+    }
+    
+    list.innerHTML = recentSales.slice(0, 5).map(sale => 
+        `<div class="sale-item">
+            <span>${sale.product} ${sale.size ? '(' + sale.size + ')' : ''} x${sale.quantity}</span>
+            <span class="sale-total">₱${sale.total.toFixed(2)}</span>
+        </div>`
+    ).join('');
+}
+</script>
+{% endblock %}

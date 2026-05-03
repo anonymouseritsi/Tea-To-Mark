@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Inventory - Tea Shop Manager{% endblock %}
+
+{% block content %}
+<div class="inventory">
+    <h2>Inventory Management</h2>
+    
+    {% if low_stock_count > 0 %}
+    <div class="alert alert-warning">
+        <strong>⚠️ {{ low_stock_count }} products</strong> have low stock
+    </div>
+    {% endif %}
+
+    <div class="inventory-list">
+        {% for product in products %}
+        <div class="inventory-item {% if product.stock <= 10 %}low-stock{% endif %}">
+            <div class="item-info">
+                <div class="item-name">{{ product.name }}</div>
+                <div class="item-category">{{ product.get_category_display }}</div>
+                <div class="item-stock">
+                    Current: <strong>{{ product.stock }}</strong>
+                    {% if product.stock <= 10 %}
+                    <span class="badge badge-warning">Low</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="item-actions">
+                <div class="restock-control">
+                    <input type="number" class="restock-input" value="10" min="1" max="999">
+                    <button class="btn btn-primary" onclick="restockProduct({{ product.id }}, this)">Restock</button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No products found</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function restockProduct(productId, button) {
+    const input = button.previousElementSibling;
+    const quantity = parseInt(input.value);
+    
+    if (!quantity || quantity < 1) {
+        alert('Please enter a valid quantity');
+        return;
+    }
+
+    fetch('/api/restock/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrftoken]').value || '{% csrf_token %}'
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: quantity
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+</script>
+{% endblock %}

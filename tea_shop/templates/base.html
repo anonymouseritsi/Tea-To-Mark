@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tea Shop Manager{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🧋 Tea Shop Manager</h1>
+            <p class="subtitle">Inventory & Sales Tracker</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">📊 Dashboard</a>
+            <a href="{% url 'sales_entry' %}" class="nav-link {% if request.resolver_match.url_name == 'sales_entry' %}active{% endif %}">💰 Sales</a>
+            <a href="{% url 'inventory' %}" class="nav-link {% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">📦 Inventory</a>
+            <a href="{% url 'sales_history' %}" class="nav-link {% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}">📋 History</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

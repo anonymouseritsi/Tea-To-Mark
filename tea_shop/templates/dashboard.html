@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Tea Shop Manager{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Sales Summary Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Today's Sales</div>
+            <div class="stat-value">₱{{ daily_sales|floatformat:0 }}</div>
+            <div class="stat-detail">{{ daily_count }} items</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Weekly Sales</div>
+            <div class="stat-value">₱{{ weekly_sales|floatformat:0 }}</div>
+            <div class="stat-detail">Last 7 days</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Monthly Sales</div>
+            <div class="stat-value">₱{{ monthly_sales|floatformat:0 }}</div>
+            <div class="stat-detail">Last 30 days</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'sales_entry' %}" class="btn btn-primary btn-large">💰 Add Sale</a>
+        <a href="{% url 'inventory' %}" class="btn btn-secondary btn-large">📦 Restock</a>
+    </div>
+
+    <!-- Low Stock Alert -->
+    {% if low_stock_products %}
+    <div class="alert alert-warning">
+        <h3>⚠️ Low Stock Alert</h3>
+        <div class="alert-list">
+            {% for product in low_stock_products %}
+            <div class="alert-item">
+                <span>{{ product.name }}</span>
+                <span class="stock-badge">{{ product.stock }} left</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
