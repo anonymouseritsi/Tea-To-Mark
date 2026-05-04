@@ -705,3 +705,124 @@ body {
         padding: 0;
     }
 }
+
+/* Cart Styles */
+.cart-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--primary-color);
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cart-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.cart-count {
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.cart-items {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: var(--light-bg);
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.cart-item-details {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.cart-item-price {
+    font-weight: bold;
+    color: var(--success-color);
+    font-size: 14px;
+}
+
+.remove-btn {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.remove-btn:hover {
+    background: #FF5555;
+}
+
+.cart-total {
+    border-top: 2px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 12px;
+    text-align: center;
+}
+
+.cart-total-amount {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--success-color);
+}
+
+.submit-order-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s;
+}
+
+.submit-order-btn:hover {
+    background: #40C057;
+}
+
+.submit-order-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}

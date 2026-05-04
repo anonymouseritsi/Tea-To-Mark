@@ -63,47 +63,22 @@
     <form id="saleForm" class="sale-form">
         {% csrf_token %}
         
-        <!-- Hidden Product Selection -->
-        <input type="hidden" id="productSelect" required>
-        <input type="hidden" id="sizeSelect" required>
-
-        <!-- Selected Product Display -->
-        <div class="selected-product" id="selectedProduct" style="display: none;">
-            <div class="selected-info">
-                <h3 id="selectedProductName"></h3>
-                <p id="selectedProductSize"></p>
+        <!-- Order Cart -->
+        <div class="order-cart">
+            <h3>Order Cart</h3>
+            <div id="cartItems" class="cart-items">
+                <p class="text-muted">No items added yet</p>
+            </div>
+            <div class="cart-total">
+                <div class="total-label">Total:</div>
+                <div class="total-value">₱<span id="cartTotal">0</span></div>
             </div>
         </div>
-
-        <!-- Auto Price Display -->
-        <div class="price-display">
-            <div class="price-label">Price:</div>
-            <div class="price-value">₱<span id="priceDisplay">0</span></div>
-        </div>
-
-        <!-- Quantity -->
-        <div class="form-group">
-            <label for="quantity">Quantity:</label>
-            <div class="quantity-control">
-                <button type="button" class="btn-qty" onclick="decreaseQty()">−</button>
-                <input type="number" id="quantity" value="1" min="1" max="999">
-                <button type="button" class="btn-qty" onclick="increaseQty()">+</button>
-            </div>
-        </div>
-
-        <!-- Total -->
-        <div class="total-display">
-            <div class="total-label">Total:</div>
-            <div class="total-value">₱<span id="totalDisplay">0</span></div>
-        </div>
-
-        <!-- Stock Info -->
-        <div class="stock-info" id="stockInfo"></div>
 
         <!-- Buttons -->
         <div class="form-actions">
-            <button type="submit" class="btn btn-success btn-large">✓ Save Sale</button>
-            <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+            <button type="submit" class="btn btn-success btn-large">✓ Complete Order</button>
+            <button type="button" class="btn btn-secondary" onclick="clearCart()">Clear Cart</button>
         </div>
 
         <!-- Success Message -->
@@ -120,9 +95,7 @@
 </div>
 
 <script>
-let currentPrice = 0;
-let currentProductId = 0;
-let currentSize = '';
+let cart = [];
 let recentSales = [];
 
 // Category Filter
@@ -147,77 +120,80 @@ function filterByCategory(e) {
     });
 }
 
-// Product Selection
-function selectProduct(productId, size, price, productName) {
-    currentProductId = productId;
-    currentSize = size;
-    currentPrice = parseFloat(price);
-    
-    document.getElementById('productSelect').value = productId;
-    document.getElementById('sizeSelect').value = size;
-    
-    // Get product name from the button's parent card
+// Add to Cart
+function selectProduct(productId, size, price) {
     const productCard = document.querySelector(`[data-product-id="${productId}"]`);
-    const name = productCard ? productCard.querySelector('.product-name').textContent : '';
+    const productName = productCard ? productCard.querySelector('.product-name').textContent : 'Unknown Product';
     
-    // Show selected product info
-    document.getElementById('selectedProductName').textContent = name;
-    document.getElementById('selectedProductSize').textContent = `Size: ${size}`;
-    document.getElementById('selectedProduct').style.display = 'block';
+    // Check if item already in cart
+    const existingItem = cart.find(item => item.productId === productId && item.size === size);
     
-    // Update price display
-    document.getElementById('priceDisplay').textContent = price.toFixed(2);
-    
-    updateTotal();
-}
-
-function updateTotal() {
-    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const total = currentPrice * quantity;
-    document.getElementById('totalDisplay').textContent = total.toFixed(2);
-}
-
-function increaseQty() {
-    const qty = document.getElementById('quantity');
-    qty.value = parseInt(qty.value) + 1;
-    updateTotal();
-}
-
-function decreaseQty() {
-    const qty = document.getElementById('quantity');
-    if (qty.value > 1) {
-        qty.value = parseInt(qty.value) - 1;
-        updateTotal();
+    if (existingItem) {
+        existingItem.quantity += 1;
+        existingItem.total = existingItem.quantity * existingItem.price;
+    } else {
+        cart.push({
+            productId: productId,
+            productName: productName,
+            size: size,
+            price: parseFloat(price),
+            quantity: 1,
+            total: parseFloat(price)
+        });
     }
+    
+    updateCartDisplay();
 }
 
-function resetForm() {
-    document.getElementById('saleForm').reset();
-    currentPrice = 0;
-    currentProductId = 0;
-    currentSize = '';
-    document.getElementById('selectedProduct').style.display = 'none';
-    document.getElementById('priceDisplay').textContent = '0';
-    document.getElementById('quantity').value = '1';
-    document.getElementById('successMessage').style.display = 'none';
+function updateCartDisplay() {
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-muted">No items added yet</p>';
+        cartTotal.textContent = '0';
+        return;
+    }
+    
+    cartItems.innerHTML = cart.map((item, index) => `
+        <div class="cart-item">
+            <div class="cart-item-info">
+                <span class="cart-item-name">${item.productName} ${item.size ? '(' + item.size + ')' : ''}</span>
+                <span class="cart-item-price">₱${item.price.toFixed(2)} x ${item.quantity}</span>
+            </div>
+            <div class="cart-item-total">₱${item.total.toFixed(2)}</div>
+            <button type="button" class="btn-remove" onclick="removeFromCart(${index})">×</button>
+        </div>
+    `).join('');
+    
+    const total = cart.reduce((sum, item) => sum + item.total, 0);
+    cartTotal.textContent = total.toFixed(2);
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartDisplay();
+}
+
+function clearCart() {
+    cart = [];
+    updateCartDisplay();
 }
 
 document.getElementById('saleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    if (!currentProductId) {
-        alert('Please select a product');
+    if (cart.length === 0) {
+        alert('Please add items to your cart');
         return;
     }
 
-    const quantity = parseInt(document.getElementById('quantity').value);
-
-    const data = {
-        product_id: currentProductId,
-        size: currentSize || null,
-        quantity: quantity,
-        price: currentPrice
-    };
+    const orderData = cart.map(item => ({
+        product_id: item.productId,
+        size: item.size || null,
+        quantity: item.quantity,
+        price: item.price
+    }));
 
     fetch('/api/add-sale/', {
         method: 'POST',
@@ -225,24 +201,23 @@ document.getElementById('saleForm').addEventListener('submit', function(e) {
             'Content-Type': 'application/json',
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ items: orderData })
     })
     .then(r => r.json())
     .then(response => {
         if (response.success) {
-            const productName = document.getElementById('selectedProductName').textContent;
+            // Add to recent sales
+            const orderTotal = cart.reduce((sum, item) => sum + item.total, 0);
             recentSales.unshift({
-                product: productName,
-                quantity: quantity,
-                size: currentSize,
-                total: parseFloat(document.getElementById('totalDisplay').textContent)
+                items: cart.map(item => `${item.productName} ${item.size ? '(' + item.size + ')' : ''} x${item.quantity}`).join(', '),
+                total: orderTotal
             });
 
             document.getElementById('successMessage').textContent = response.message;
             document.getElementById('successMessage').style.display = 'block';
             
             updateRecentSales();
-            resetForm();
+            clearCart();
             
             setTimeout(() => {
                 document.getElementById('successMessage').style.display = 'none';
@@ -262,7 +237,7 @@ function updateRecentSales() {
     
     list.innerHTML = recentSales.slice(0, 5).map(sale => 
         `<div class="sale-item">
-            <span>${sale.product} ${sale.size ? '(' + sale.size + ')' : ''} x${sale.quantity}</span>
+            <span>${sale.items}</span>
             <span class="sale-total">₱${sale.total.toFixed(2)}</span>
         </div>`
     ).join('');

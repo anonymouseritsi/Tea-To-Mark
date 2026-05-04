@@ -52,38 +52,81 @@ def sales_entry(request):
 
 @require_POST
 def add_sale(request):
-    """Add a sale via AJAX."""
+    """Add a sale via AJAX - supports single item or multiple items."""
     try:
         data = json.loads(request.body)
-        product_id = data.get('product_id')
-        size = data.get('size')
-        quantity = int(data.get('quantity', 1))
-        price = float(data.get('price'))
+        
+        # Check if it's a single item or multiple items
+        if 'items' in data:
+            # Multiple items
+            items = data['items']
+            total_sale_amount = 0
+            sale_records = []
+            
+            for item in items:
+                product_id = item.get('product_id')
+                size = item.get('size')
+                quantity = int(item.get('quantity', 1))
+                price = float(item.get('price'))
 
-        product = get_object_or_404(Product, id=product_id)
-        total = quantity * price
+                product = get_object_or_404(Product, id=product_id)
+                total = quantity * price
 
-        # Deduct stock
-        product.stock -= quantity
-        if product.stock < 0:
-            product.stock = 0
-        product.save()
+                # Deduct stock
+                product.stock -= quantity
+                if product.stock < 0:
+                    product.stock = 0
+                product.save()
 
-        # Create sale record
-        sale = Sale.objects.create(
-            product=product,
-            size=size,
-            quantity=quantity,
-            price=price,
-            total=total
-        )
+                # Create sale record
+                sale = Sale.objects.create(
+                    product=product,
+                    size=size,
+                    quantity=quantity,
+                    price=price,
+                    total=total
+                )
+                
+                sale_records.append(sale)
+                total_sale_amount += total
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Order completed: {len(items)} items - ₱{total_sale_amount}',
+                'sale_ids': [sale.id for sale in sale_records],
+                'total_amount': total_sale_amount
+            })
+        else:
+            # Single item (backward compatibility)
+            product_id = data.get('product_id')
+            size = data.get('size')
+            quantity = int(data.get('quantity', 1))
+            price = float(data.get('price'))
 
-        return JsonResponse({
-            'success': True,
-            'message': f'Sale added: {product.name} x{quantity} - ₱{total}',
-            'sale_id': sale.id,
-            'remaining_stock': product.stock
-        })
+            product = get_object_or_404(Product, id=product_id)
+            total = quantity * price
+
+            # Deduct stock
+            product.stock -= quantity
+            if product.stock < 0:
+                product.stock = 0
+            product.save()
+
+            # Create sale record
+            sale = Sale.objects.create(
+                product=product,
+                size=size,
+                quantity=quantity,
+                price=price,
+                total=total
+            )
+
+            return JsonResponse({
+                'success': True,
+                'message': f'Sale added: {product.name} x{quantity} - ₱{total}',
+                'sale_id': sale.id,
+                'remaining_stock': product.stock
+            })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 

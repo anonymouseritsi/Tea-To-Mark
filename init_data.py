@@ -21,7 +21,7 @@ products_data = [
     ('Wintermelon', 'classic_milk_tea', None, 29, 39),
     ('Cookies & Cream', 'classic_milk_tea', None, 29, 39),
     ('Okinawa', 'classic_milk_tea', None, 29, 39),
-    ('Hokkaido', 'classic_milk_tea', None, 29, 39),
+    ('Mango Cheesecake', 'classic_milk_tea', None, 29, 39),
     
     # Premium Milk Tea (16oz/22oz)
     ('Red Velvet', 'premium_milk_tea', None, 35, 45),
@@ -33,10 +33,10 @@ products_data = [
     ('Mango', 'milkshakes', None, 35, 45),
     ('Strawberry', 'milkshakes', None, 35, 45),
     ('Avocado', 'milkshakes', None, 35, 45),
-    ('Chocolate', 'milkshakes', None, 35, 45),
+    ('Rocky Road', 'milkshakes', None, 35, 45),
     
     # Special Milkshakes (16oz/22oz)
-    ('Oreo', 'special_milkshakes', None, 50, 65),
+    ('Mango Graham Shake', 'special_milkshakes', None, 50, 65),
     ('Avocado Oreo', 'special_milkshakes', None, 50, 65),
     
     # Sundaes (single prices)
@@ -80,9 +80,9 @@ products_data = [
     ('Iced Coffee', 'iced_coffee', 29, 39, 49),
     
     # Burgers (keeping existing)
-    ('Burger Solo', 'burgers', None, None, None, 25),
+    ('Burger Plain', 'burgers', None, None, None, 25),
     ('Burger w/ Cheese', 'burgers', None, None, None, 35),
-    ('Burger w/ Egg', 'burgers', None, None, None, 45),
+    ('Chicken Burger', 'burgers', None, None, None, 45),
     
     # Fries (keeping existing)
     ('Fries Solo', 'fries', None, None, None, 25),
@@ -90,10 +90,14 @@ products_data = [
     ('Fries Group', 'fries', None, None, None, 99),
     
     # Rice Meals (keeping existing)
-    ('Hungarian Sausage', 'rice_meals', None, None, None, 45),
-    ('Pork Steak', 'rice_meals', None, None, None, 45),
-    ('Chicken Fillet Small', 'rice_meals', None, None, None, 45),
-    ('Chicken Fillet Large', 'rice_meals', None, None, None, 75),
+    ('Hungarian Sausage 65', 'rice_meals', None, None, None, 65),
+    ('Burger Steak 1pc', 'rice_meals', None, None, None, 45),
+    ('Burger Steak 2pcs', 'rice_meals', None, None, None, 65),
+    ('Chicken Fillet(1pc)', 'rice_meals', None, None, None, 45),
+    ('Chicken Fillet(2pcs)', 'rice_meals', None, None, None, 75),
+    ('Siomai Rice', 'rice_meals', None, None, None, 45),
+    ('Shanghai Rice', 'rice_meals', None, None, None, 45),
+    ('Chicken Pops', 'rice_meals', None, None, None, 45),
     
     # Siopao (keeping existing)
     ('Siopao Small', 'siopao', None, None, None, 15),
